@@ -1,9 +1,10 @@
-const router = require('express').Router();
-const User = require('../model/User');
+import express from 'express';
+export const authRoute = express.Router();
+import User from '../model/User';
 
 // Validation
 const Joi = require('@hapi/joi');
-const schema = {
+const schema = Joi.object({
   name: Joi.string()
     .min(6)
     .required(),
@@ -12,11 +13,11 @@ const schema = {
     .required()
     .email(),
   password: Joi.string().min(6),
-};
+});
 
-router.post('/register', async (req, res) => {
+authRoute.post('/register', async (req, res) => {
   // Validate user
-  const validation = Joi.validate(req.body, schema);
+  const validation = schema.validate(req.body);
   res.send(validation);
   // const user = new User({
   //   name: req.body.name,
@@ -30,5 +31,3 @@ router.post('/register', async (req, res) => {
   //   res.status(400).send(err.message);
   // }
 });
-
-module.exports = router;
