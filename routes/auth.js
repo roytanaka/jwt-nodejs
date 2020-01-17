@@ -1,11 +1,11 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../model/User';
+import User from '../models/User';
 import { registerVal, loginVal } from '../utils/validation';
 const router = express.Router();
 
-export const registerRoute = router.post('/register', async (req, res) => {
+router.post('/register', async (req, res) => {
   // Validate user
   const { error } = registerVal(req.body);
   if (error) return res.status(400).send(error.details);
@@ -36,7 +36,7 @@ export const registerRoute = router.post('/register', async (req, res) => {
   }
 });
 
-export const loginRoute = router.post('/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   // Validate user
   const { error } = loginVal(req.body);
   if (error) return res.status(400).send(error.details);
@@ -55,3 +55,5 @@ export const loginRoute = router.post('/login', async (req, res) => {
 
   res.header('auth-token', token).send(token);
 });
+
+export default router;
