@@ -2,7 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import mongoose from 'mongoose';
-import authRoute from './routes/auth';
+import { registerRoute } from './routes/auth';
+import { postsRoute } from './routes/posts';
 const app = express();
 
 // Connect to DB
@@ -20,7 +21,8 @@ mongoose.connect(
 app.use(express.json());
 
 // Route middleware
-app.use('/api/user', authRoute);
+app.use('/api/user', registerRoute);
+app.use('/api', postsRoute);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server started on ${PORT}`));

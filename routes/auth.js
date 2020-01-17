@@ -1,33 +1,57 @@
 import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import User from '../model/User';
-import Joi from '@hapi/joi';
-const authRoute = express.Router();
+import { registerVal, loginVal } from '../utils/validation';
+const router = express.Router();
 
-// Validation
-const schema = Joi.object({
-  name: Joi.string()
-    .min(6)
-    .required(),
-  email: Joi.string()
-    .min(6)
-    .required()
-    .email(),
-  password: Joi.string().min(6),
+export const registerRoute = router.post('/register', async (req, res) => {
+  // Validate user
+  const { error } = registerVal(req.body);
+  if (error) return res.status(400).send(error.details);
+
+  // Check if user exists
+  const userExists = await User.findOne({ email: req.body.email });
+  if (userExists) return res.status(400).send('email already exists');
+
+  // Hash Password
+  let hashPassword;
+  try {
+    const salt = await bcrypt.genSalt(10);
+    hashPassword = await bcrypt.hash(req.body.password, salt);
+  } catch (error) {
+    return res.status(500).send('Server error: hashing password');
+  }
+
+  const user = new User({
+    name: req.body.name,
+    email: req.body.email,
+    password: hashPassword,
+  });
+  try {
+    const { _id } = await user.save();
+    res.send({ userId: _id });
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
 });
 
-export default authRoute.post('/register', async (req, res) => {
+export const loginRoute = router.post('/login', async (req, res) => {
   // Validate user
-  const validation = schema.validate(req.body);
-  res.send(validation);
-  // const user = new User({
-  //   name: req.body.name,
-  //   email: req.body.email,
-  //   password: req.body.password,
-  // });
-  // try {
-  //   const savedUser = await user.save();
-  //   res.send(savedUser);
-  // } catch (err) {
-  //   res.status(400).send(err.message);
-  // }
+  const { error } = loginVal(req.body);
+  if (error) return res.status(400).send(error.details);
+
+  // Check if user exists
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) return res.status(400).send('Invalid email or password');
+
+  // Check if password matches
+  const passwordValid = await bcrypt.compare(req.body.password, user.password);
+  if (!passwordValid) return res.status(400).send('Invalid email or password');
+
+  // Create and assign token
+
+  const token = jwt.sign({ _id: user._id }, process.env.ACCESS_TOKEN_SECRET);
+
+  res.header('auth-token', token).send(token);
 });
