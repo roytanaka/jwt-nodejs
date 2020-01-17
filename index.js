@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 import mongoose from 'mongoose';
-import { authRoute } from './routes/auth';
+import authRoute from './routes/auth';
 const app = express();
 
 // Connect to DB
@@ -13,7 +13,7 @@ const host = process.env.DB_HOST;
 mongoose.connect(
   `mongodb+srv://${user}:${pass}@${host}`,
   { useNewUrlParser: true, useUnifiedTopology: true },
-  () => console.log('connect to DB')
+  () => console.log('connected to DB')
 );
 
 // Middleware

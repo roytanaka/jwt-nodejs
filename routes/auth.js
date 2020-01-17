@@ -1,9 +1,9 @@
 import express from 'express';
-export const authRoute = express.Router();
 import User from '../model/User';
+import Joi from '@hapi/joi';
+const authRoute = express.Router();
 
 // Validation
-const Joi = require('@hapi/joi');
 const schema = Joi.object({
   name: Joi.string()
     .min(6)
@@ -15,7 +15,7 @@ const schema = Joi.object({
   password: Joi.string().min(6),
 });
 
-authRoute.post('/register', async (req, res) => {
+export default authRoute.post('/register', async (req, res) => {
   // Validate user
   const validation = schema.validate(req.body);
   res.send(validation);
