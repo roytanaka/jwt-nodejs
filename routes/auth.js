@@ -36,6 +36,16 @@ router.post('/register', async (req, res) => {
   }
 });
 
+const generateAccessToken = userObject =>
+  jwt.sign(userObject, process.env.ACCESS_TOKEN_SECRET, {
+    expiresIn: '3min',
+  });
+
+const generateRefreshToken = userObject =>
+  jwt.sign(userObject, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: '1h',
+  });
+
 router.post('/login', async (req, res) => {
   // Validate user
   const { error } = loginVal(req.body);
@@ -49,19 +59,28 @@ router.post('/login', async (req, res) => {
   const passwordValid = await bcrypt.compare(req.body.password, user.password);
   if (!passwordValid) return res.status(400).send('Invalid email or password');
 
-  // Create and assign token, expires in 30s
-  const token = jwt.sign(
-    {
-      _id: user._id,
-      role: user.role,
-    },
-    process.env.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: '3min',
-    }
-  );
+  const userInfo = { _id: user._id, role: user.role };
 
-  res.header('Authorization', `Bearer ${token}`).send(token);
+  // Create and assign token
+  const accessToken = generateAccessToken(userInfo);
+  const refreshToken = generateRefreshToken(userInfo);
+
+  res.json({ accessToken, refreshToken });
+});
+
+router.post('/token', (req, res) => {
+  const refreshToken = req.body.token;
+  try {
+    const verified = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    console.log(verified);
+    const accessToken = generateAccessToken({
+      _id: verified._id,
+      role: verified.role,
+    });
+    res.json({ accessToken });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 export default router;
