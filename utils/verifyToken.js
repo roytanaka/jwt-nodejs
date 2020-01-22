@@ -6,7 +6,7 @@ export default function(req, res, next) {
     authHeader && authHeader.split(' ')[0] === 'Bearer'
       ? authHeader.split(' ')[1]
       : null;
-  if (!token) return res.status(401).send('Access denied');
+  if (!token) return res.status(401).send('Missing token. Access denied');
 
   try {
     const verified = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -14,6 +14,6 @@ export default function(req, res, next) {
     next();
   } catch (error) {
     console.error(error);
-    res.status(403).send(error.message);
+    res.status(401).send(error.message);
   }
 }
