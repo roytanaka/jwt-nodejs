@@ -50,11 +50,18 @@ router.post('/login', async (req, res) => {
   if (!passwordValid) return res.status(400).send('Invalid email or password');
 
   // Create and assign token, expires in 30s
-  const token = jwt.sign({ _id: user._id }, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: 30000,
-  });
+  const token = jwt.sign(
+    {
+      _id: user._id,
+      role: user.role,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: '3min',
+    }
+  );
 
-  res.header('auth-token', token).send(token);
+  res.header('Authorization', `Bearer ${token}`).send(token);
 });
 
 export default router;
