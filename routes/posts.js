@@ -6,8 +6,6 @@ const router = express.Router();
 // Get all posts by user
 router.get('/posts', verify, async (req, res) => {
   try {
-    console.log(req.user);
-
     const posts = await Post.find({ author: req.user });
     res.json(posts);
   } catch (error) {
