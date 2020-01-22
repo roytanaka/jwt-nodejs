@@ -13,6 +13,7 @@ export default function(req, res, next) {
     req.user = verified;
     next();
   } catch (error) {
-    res.status(403).send('Invalid token');
+    console.error(error);
+    res.status(403).send(error.message);
   }
 }
