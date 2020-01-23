@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from 'express';
 import mongoose from 'mongoose';
+import cors from 'cors';
 import authRoutes from './routes/auth';
 import postsRoutes from './routes/posts';
 
@@ -21,6 +22,7 @@ mongoose.connect(
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 
 // Route middleware
 app.use('/api/user', authRoutes);
