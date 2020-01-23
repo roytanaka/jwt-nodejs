@@ -59,13 +59,18 @@ router.post('/login', async (req, res) => {
   const passwordValid = await bcrypt.compare(req.body.password, user.password);
   if (!passwordValid) return res.status(400).send('Invalid email or password');
 
-  const userInfo = { _id: user._id, role: user.role };
+  const userInfo = {
+    _id: user._id,
+    role: user.role,
+    email: user.email,
+    name: user.name,
+  };
 
   // Create and assign token
-  const accessToken = generateAccessToken(userInfo);
-  const refreshToken = generateRefreshToken(userInfo);
+  const accessToken = generateAccessToken({ _id: user._id });
+  const refreshToken = generateRefreshToken({ _id: user._id });
 
-  res.json({ accessToken, refreshToken });
+  res.json({ accessToken, refreshToken, user: userInfo });
 });
 
 router.post('/token', (req, res) => {
